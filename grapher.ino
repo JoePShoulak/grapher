@@ -8,6 +8,7 @@
 #define SCREEN_HEIGHT 64
 #define GRAPH_HEIGHT 50
 #define POINT_COUNT 16  // TODO: Why can't this be 32?
+#define GRAPH_MARGIN 3
 
 int pointSpacing;
 CircularBuffer<float, POINT_COUNT> dataPoints;
@@ -70,8 +71,12 @@ void graphData() {
     int xPrev = pointSpacing * (i - 1);
     int xCurr = pointSpacing * i;
 
-    int yPrev = map(dataPoints[i - 1], min, max, SCREEN_HEIGHT, SCREEN_HEIGHT - GRAPH_HEIGHT);
-    int yCurr = map(dataPoints[i], min, max, SCREEN_HEIGHT, SCREEN_HEIGHT - GRAPH_HEIGHT);
+    int yPrev = map(dataPoints[i - 1], min, max, SCREEN_HEIGHT - GRAPH_MARGIN, SCREEN_HEIGHT - GRAPH_HEIGHT + GRAPH_MARGIN);
+    int yCurr = map(dataPoints[i], min, max, SCREEN_HEIGHT - GRAPH_MARGIN, SCREEN_HEIGHT - GRAPH_HEIGHT + GRAPH_MARGIN);
+
+    if (i == dataPoints.index() - 1) {
+      display.drawDisc(xCurr, yCurr, GRAPH_MARGIN - 1);
+    }
 
     display.drawLine(xPrev, yPrev, xCurr, yCurr);
   }
