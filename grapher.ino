@@ -60,25 +60,39 @@ T getMin(CircularBuffer<T, N> buffer) {
   return min;
 }
 
-void graphData() {
+float getY(int i, float min, float max) {
+  return map(dataPoints[i], min, max, SCREEN_HEIGHT - GRAPH_MARGIN, SCREEN_HEIGHT - GRAPH_HEIGHT + GRAPH_MARGIN);
+}
 
+void drawLine(int i, float min, float max) {
+  int xPrev = pointSpacing * (i - 1);
+  int xCurr = pointSpacing * i;
+
+  int yPrev = getY(i-1, min, max);
+  int yCurr = getY(i, min, max);
+
+  display.drawLine(xPrev, yPrev, xCurr, yCurr);
+}
+
+void drawPoint(int i, float min, float max) {
+  int xCurr = pointSpacing * i;
+  int yCurr = getY(i, min, max);
+
+  display.drawDisc(xCurr, yCurr, GRAPH_MARGIN - 1);
+}
+
+void graphData() {
   display.drawFrame(0, SCREEN_HEIGHT - GRAPH_HEIGHT, SCREEN_WIDTH, GRAPH_HEIGHT);
 
   float min = getMin(dataPoints);
   float max = getMax(dataPoints);
 
-  for (int i = 1; i < dataPoints.count(); i++) {
-    int xPrev = pointSpacing * (i - 1);
-    int xCurr = pointSpacing * i;
+  for (int i = 0; i < dataPoints.count(); i++) {
+    if (i == dataPoints.index() - 1) 
+      drawPoint(i, min, max);
 
-    int yPrev = map(dataPoints[i - 1], min, max, SCREEN_HEIGHT - GRAPH_MARGIN, SCREEN_HEIGHT - GRAPH_HEIGHT + GRAPH_MARGIN);
-    int yCurr = map(dataPoints[i], min, max, SCREEN_HEIGHT - GRAPH_MARGIN, SCREEN_HEIGHT - GRAPH_HEIGHT + GRAPH_MARGIN);
-
-    if (i == dataPoints.index() - 1) {
-      display.drawDisc(xCurr, yCurr, GRAPH_MARGIN - 1);
-    }
-
-    display.drawLine(xPrev, yPrev, xCurr, yCurr);
+    if (i != 0) 
+      drawLine(i, min, max);
   }
 }
 
