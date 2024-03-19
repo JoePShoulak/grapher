@@ -1,7 +1,7 @@
 #include "Graph.h"
 
 template<typename T, int N>
-Graph<T, N>::Graph(U8G2_SSD1306_128X64_NONAME_F_HW_I2C display, int x1, int y1, int x2, int y2) {
+Graph<T, N>::Graph(const U8G2_SSD1306_128X64_NONAME_F_HW_I2C &display, int x1, int y1, int x2, int y2) {
   _x1 = x1;
   _y1 = y1;
   _x2 = x2;

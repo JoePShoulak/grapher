@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <U8g2lib.h>
 #include "CircularBuffer.h"
+#include "bufferHelper.h"
 // #include "Graph.h"
 
 #define SCREEN_WIDTH 128
@@ -14,34 +15,6 @@ CircularBuffer<float, POINT_COUNT> dataPoints;
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C display(U8G2_R0, U8X8_PIN_NONE);
 
 // Graph<float, 16> graph(display, 0, 0, 30, 15);
-
-template<typename T, int N>
-T getMax(CircularBuffer<T, N> buffer) {
-  T max = buffer[0];
-
-  for (int i = 1; i < dataPoints.count(); i++) {
-    T yCurr = dataPoints[i];
-
-    if (yCurr > max)
-      max = yCurr;
-  }
-
-  return max;
-}
-
-template<typename T, int N>
-T getMin(CircularBuffer<T, N> buffer) {
-  T min = buffer[0];
-
-  for (int i = 1; i < dataPoints.count(); i++) {
-    T yCurr = dataPoints[i];
-
-    if (yCurr < min)
-      min = yCurr;
-  }
-
-  return min;
-}
 
 float getY(int i, float min, float max) {
   return map(dataPoints[i], min, max, SCREEN_HEIGHT - GRAPH_MARGIN, SCREEN_HEIGHT - GRAPH_HEIGHT + GRAPH_MARGIN);
