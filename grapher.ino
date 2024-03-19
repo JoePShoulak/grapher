@@ -7,18 +7,12 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define GRAPH_HEIGHT 50
-#define POINT_COUNT 16  // TODO: Why can't this be 32?
+#define POINT_COUNT 17  // TODO: Why can't this be 32?
 #define GRAPH_MARGIN 3
 
 int pointSpacing;
 CircularBuffer<float, POINT_COUNT> dataPoints;
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C display(U8G2_R0, U8X8_PIN_NONE);
-
-String getData() {
-  String rawValue = Serial.readString();
-  rawValue.trim();
-  return rawValue;
-}
 
 // TODO: Do all this graphing stuff in a class
 // Graph<float, 16> graph(display, 0, 0, 30, 15);
@@ -31,7 +25,7 @@ void drawLine(int i, float min, float max) {
   int xPrev = pointSpacing * (i - 1);
   int xCurr = pointSpacing * i;
 
-  int yPrev = getY(i-1, min, max);
+  int yPrev = getY(i - 1, min, max);
   int yCurr = getY(i, min, max);
 
   display.drawLine(xPrev, yPrev, xCurr, yCurr);
@@ -62,17 +56,17 @@ void updateGraph(String rawValue) {
   float max = getMax(dataPoints);
 
   for (int i = 0; i < dataPoints.count(); i++) {
-    if (i == dataPoints.index() - 1) 
+    if (i == dataPoints.index() - 1 || i == dataPoints.count() - 1)
       drawPoint(i, min, max);
 
-    if (i != 0) 
+    if (i != 0)
       drawLine(i, min, max);
   }
 }
 
 // Main
 void setup() {
-  pointSpacing = SCREEN_WIDTH / POINT_COUNT;
+  pointSpacing = SCREEN_WIDTH / (POINT_COUNT - 1);
 
   display.begin();
   display.setPowerSave(0);
@@ -90,7 +84,8 @@ void setup() {
 void loop() {
   if (!Serial.available()) return;
 
-  String rawValue = getData();
+  String rawValue = Serial.readString();
+  rawValue.trim();
 
   // TODO: Find out how to combine these into one function
   display.clearBuffer();
