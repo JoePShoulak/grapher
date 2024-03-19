@@ -14,6 +14,13 @@ int pointSpacing;
 CircularBuffer<float, POINT_COUNT> dataPoints;
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C display(U8G2_R0, U8X8_PIN_NONE);
 
+String getData() {
+  String rawValue = Serial.readString();
+  rawValue.trim();
+  return rawValue;
+}
+
+// TODO: Do all this graphing stuff in a class
 // Graph<float, 16> graph(display, 0, 0, 30, 15);
 
 float getY(int i, float min, float max) {
@@ -35,12 +42,6 @@ void drawPoint(int i, float min, float max) {
   int yCurr = getY(i, min, max);
 
   display.drawDisc(xCurr, yCurr, GRAPH_MARGIN - 1);
-}
-
-String getData() {
-  String rawValue = Serial.readString();
-  rawValue.trim();
-  return rawValue;
 }
 
 void updateText(String rawValue) {
@@ -69,6 +70,7 @@ void updateGraph(String rawValue) {
   }
 }
 
+// Main
 void setup() {
   pointSpacing = SCREEN_WIDTH / POINT_COUNT;
 
@@ -78,6 +80,7 @@ void setup() {
 
   Serial.begin(9600);
 
+  // TODO: Find out how to combine these into one function
   display.clearBuffer();
   updateText("?");
   updateGraph("");
@@ -89,6 +92,7 @@ void loop() {
 
   String rawValue = getData();
 
+  // TODO: Find out how to combine these into one function
   display.clearBuffer();
   updateText(rawValue);
   updateGraph(rawValue);
