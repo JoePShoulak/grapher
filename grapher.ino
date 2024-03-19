@@ -51,9 +51,11 @@ void updateText(String rawValue) {
 }
 
 void updateGraph(String rawValue) {
-  dataPoints.append(rawValue.toFloat());
-
   display.drawFrame(0, SCREEN_HEIGHT - GRAPH_HEIGHT, SCREEN_WIDTH, GRAPH_HEIGHT);
+
+  if (rawValue == "") return;
+
+  dataPoints.append(rawValue.toFloat());
 
   float min = getMin(dataPoints);
   float max = getMax(dataPoints);
@@ -76,10 +78,9 @@ void setup() {
 
   Serial.begin(9600);
 
-  display.drawFrame(0, SCREEN_HEIGHT - GRAPH_HEIGHT, SCREEN_WIDTH, GRAPH_HEIGHT);
-  display.setCursor(0, 10);
-  display.print("Temp: ?F");
-
+  display.clearBuffer();
+  updateText("?");
+  updateGraph("");
   display.sendBuffer();
 }
 
