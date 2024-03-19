@@ -54,7 +54,7 @@ void updateText(String rawValue) {
 void updateGraph(String rawValue) {
   display.drawFrame(0, SCREEN_HEIGHT - GRAPH_HEIGHT, SCREEN_WIDTH, GRAPH_HEIGHT);
 
-  if (rawValue == "") return;
+  if (rawValue == "?") return;
 
   dataPoints.append(rawValue.toFloat());
 
@@ -83,7 +83,7 @@ void setup() {
   // TODO: Find out how to combine these into one function
   display.clearBuffer();
   updateText("?");
-  updateGraph("");
+  updateGraph("?");
   display.sendBuffer();
 }
 
