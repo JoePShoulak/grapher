@@ -2,23 +2,23 @@
 #include <U8g2lib.h>
 #include "CircularBuffer.h"
 #include "bufferHelper.h"
-// #include "Graph.h"
+#include "Graph.h"
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define GRAPH_HEIGHT 50
-#define POINT_COUNT 17  // TODO: Why can't this be 32?
 #define GRAPH_MARGIN 3
+#define POINT_COUNT 17  // TODO: Why can't this be 32/33?
 
 int pointSpacing;
-CircularBuffer<float, POINT_COUNT> dataPoints;
+// CircularBuffer<float, POINT_COUNT> dataPoints;
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C display(U8G2_R0, U8X8_PIN_NONE);
 
 // TODO: Do all this graphing stuff in a class
-// Graph<float, 16> graph(display, 0, 0, 30, 15);
+Graph<float, POINT_COUNT> graph(display, 0, 0, 30, 15);
 
 float getY(int i, float min, float max) {
-  return map(dataPoints[i], min, max, SCREEN_HEIGHT - GRAPH_MARGIN, SCREEN_HEIGHT - GRAPH_HEIGHT + GRAPH_MARGIN);
+  return map(graph.buffer[i], min, max, SCREEN_HEIGHT - GRAPH_MARGIN, SCREEN_HEIGHT - GRAPH_HEIGHT + GRAPH_MARGIN);
 }
 
 void drawLine(int i, float min, float max) {
@@ -50,13 +50,13 @@ void updateGraph(String rawValue) {
 
   if (rawValue == "?") return;
 
-  dataPoints.append(rawValue.toFloat());
+  graph.buffer.append(rawValue.toFloat());
 
-  float min = getMin(dataPoints);
-  float max = getMax(dataPoints);
+  float min = getMin(graph.buffer);
+  float max = getMax(graph.buffer);
 
-  for (int i = 0; i < dataPoints.count(); i++) {
-    if (i == dataPoints.index() - 1 || i == dataPoints.count() - 1)
+  for (int i = 0; i < graph.buffer.count(); i++) {
+    if (i == graph.buffer.index() - 1 || i == graph.buffer.count() - 1)
       drawPoint(i, min, max);
 
     if (i != 0)
