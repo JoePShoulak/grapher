@@ -4,6 +4,7 @@
 #include <U8g2lib.h>
 #include <Arduino.h>
 #include "CircularBuffer.h"
+#include "bufferHelper.h"
 
 template<typename T, int N>
 class Graph {
@@ -12,6 +13,11 @@ public:
 
   T getY(int i, T min, T max);
   void drawLine(int i, T min, T max);
+  void drawPoint(int i, T min, T max);
+  void updateGraph(String rawValue);
+  void updateText(String rawValue);
+  void update();
+  void begin();
   CircularBuffer<T, N> buffer;
 
 private:
@@ -50,6 +56,65 @@ void Graph<T, N>::drawLine(int i, T min, T max) {
   int yCurr = this->getY(i, min, max);
 
   _display.drawLine(xPrev, yPrev, xCurr, yCurr);
+}
+
+template<typename T, int N>
+void Graph<T, N>::drawPoint(int i, T min, T max) {
+  int xCurr = _pointSpacing * i;
+  int yCurr = this->getY(i, min, max);
+
+  _display.drawDisc(xCurr, yCurr, _graphMargin - 1);
+}
+
+template<typename T, int N>
+void Graph<T, N>::updateText(String rawValue) {
+  _display.setCursor(0, 10);
+  _display.print("Temp: ");
+  _display.print(rawValue.c_str());
+  _display.print("F");
+}
+
+template<typename T, int N>
+void Graph<T, N>::updateGraph(String rawValue) {
+  _display.drawFrame(0, _screenHeight - _graphHeight, _screenWidth, _graphHeight);
+
+  if (rawValue == "?") return;
+
+  buffer.append(rawValue.toFloat());
+
+  float min = getMin(buffer);
+  float max = getMax(buffer);
+
+  for (int i = 0; i < buffer.count(); i++) {
+    if (i == buffer.index() - 1 || i == buffer.count() - 1)
+      this->drawPoint(i, min, max);
+
+    if (i != 0)
+      this->drawLine(i, min, max);
+  }
+}
+
+template<typename T, int N>
+void Graph<T, N>::update() {
+  String rawValue = Serial.readString();
+  rawValue.trim();
+
+  _display.clearBuffer();
+  this->updateText(rawValue);
+  this->updateGraph(rawValue);
+  _display.sendBuffer();
+}
+
+template<typename T, int N>
+void Graph<T, N>::begin() {
+  _display.begin();
+  _display.setPowerSave(0);
+  _display.setFont(u8g2_font_helvR08_tf);
+
+  _display.clearBuffer();
+  this->updateText("?");
+  this->updateGraph("?");
+  _display.sendBuffer();
 }
 
 #endif
