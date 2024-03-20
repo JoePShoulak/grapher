@@ -11,7 +11,6 @@
 #define POINT_COUNT 17  // TODO: Why can't this be 32/33?
 
 int pointSpacing;
-// CircularBuffer<float, POINT_COUNT> dataPoints;
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C display(U8G2_R0, U8X8_PIN_NONE);
 
 // TODO: Do all this graphing stuff in a class
@@ -64,6 +63,13 @@ void updateGraph(String rawValue) {
   }
 }
 
+void updateDisplay(String value) {
+   display.clearBuffer();
+  updateText(value);
+  updateGraph(value);
+  display.sendBuffer(); 
+}
+
 // Main
 void setup() {
   pointSpacing = SCREEN_WIDTH / (POINT_COUNT - 1);
@@ -74,7 +80,6 @@ void setup() {
 
   Serial.begin(9600);
 
-  // TODO: Find out how to combine these into one function
   display.clearBuffer();
   updateText("?");
   updateGraph("?");
@@ -87,7 +92,6 @@ void loop() {
   String rawValue = Serial.readString();
   rawValue.trim();
 
-  // TODO: Find out how to combine these into one function
   display.clearBuffer();
   updateText(rawValue);
   updateGraph(rawValue);
