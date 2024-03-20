@@ -6,45 +6,39 @@
 #include "CircularBuffer.h"
 #include "bufferHelper.h"
 
+// TODO: Limit this to numeric types
+// TODO: Add options for label and unit for value display
+// CONSIDER: Adding fixed yMin and yMax instead of autoscaling
+// CONSIDER: Adding different scroll modes for the data
 template<typename T, int N>
 class Graph {
 public:
   Graph(U8G2_SSD1306_128X64_NONAME_F_HW_I2C &display, int screenWidth, int screenHeight, int graphHeight, int graphMargin, int pointCount);
+  void begin();
 
   T getY(int i, T min, T max);
   void drawLine(int i, T min, T max);
   void drawPoint(int i, T min, T max);
   void updateGraph(String rawValue);
   void updateText(String rawValue);
-  void update();
-  void begin();
-  CircularBuffer<T, N> buffer;
+  void update(String rawValue);
 
 private:
-  int _screenWidth;
-  int _screenHeight;
-  int _graphHeight;
-  int _graphMargin;
-  int _pointCount;
-  int _pointSpacing;
+  int _screenWidth, _screenHeight, _graphHeight, _graphMargin, _pointCount, _pointSpacing;
 
+  CircularBuffer<T, N> _buffer;
   U8G2_SSD1306_128X64_NONAME_F_HW_I2C &_display;
 };
 
 template<typename T, int N>
 Graph<T, N>::Graph(U8G2_SSD1306_128X64_NONAME_F_HW_I2C &display, int screenWidth, int screenHeight, int graphHeight, int graphMargin, int pointCount)
-  : _display(display) {
-  _screenWidth = screenWidth;
-  _screenHeight = screenHeight;
-  _graphHeight = graphHeight;
-  _graphMargin = graphMargin;
-  _pointCount = pointCount;
+  : _display(display), _screenWidth(screenWidth), _screenHeight(screenHeight), _graphHeight(graphHeight), _graphMargin(graphMargin), _pointCount(pointCount) {
   _pointSpacing = _screenWidth / (_pointCount - 1);
 }
 
 template<typename T, int N>
 T Graph<T, N>::getY(int i, T min, T max) {
-  return map(buffer[i], min, max, _screenHeight - _graphMargin, _screenHeight - _graphHeight + _graphMargin);
+  return map(_buffer[i], min, max, _screenHeight - _graphMargin, _screenHeight - _graphHeight + _graphMargin);
 }
 
 template<typename T, int N>
@@ -80,13 +74,13 @@ void Graph<T, N>::updateGraph(String rawValue) {
 
   if (rawValue == "?") return;
 
-  buffer.append(rawValue.toFloat());
+  _buffer.append(rawValue.toFloat());
 
-  float min = getMin(buffer);
-  float max = getMax(buffer);
+  T min = getMin(_buffer);
+  T max = getMax(_buffer);
 
-  for (int i = 0; i < buffer.count(); i++) {
-    if (i == buffer.index() - 1 || i == buffer.count() - 1)
+  for (int i = 0; i < _buffer.count(); i++) {
+    if (i == _buffer.index() - 1 || i == _buffer.count() - 1)
       this->drawPoint(i, min, max);
 
     if (i != 0)
@@ -95,10 +89,7 @@ void Graph<T, N>::updateGraph(String rawValue) {
 }
 
 template<typename T, int N>
-void Graph<T, N>::update() {
-  String rawValue = Serial.readString();
-  rawValue.trim();
-
+void Graph<T, N>::update(String rawValue) {
   _display.clearBuffer();
   this->updateText(rawValue);
   this->updateGraph(rawValue);

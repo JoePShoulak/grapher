@@ -9,6 +9,7 @@
 #define POINT_COUNT 17  // TODO: Why can't this be 32/33?
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C display(U8G2_R0, U8X8_PIN_NONE);
+// TODO: Allow label definitions for the variable and the unit
 Graph<float, POINT_COUNT> graph(display, SCREEN_WIDTH, SCREEN_HEIGHT, GRAPH_HEIGHT, GRAPH_MARGIN, POINT_COUNT);
 
 void setup() {
@@ -17,6 +18,10 @@ void setup() {
 }
 
 void loop() {
-  if (Serial.available())
-    graph.update();
+  if (Serial.available()) {
+    String rawValue = Serial.readString();
+    rawValue.trim();
+
+    graph.update(rawValue);
+  }
 }
