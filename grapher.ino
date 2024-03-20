@@ -12,27 +12,11 @@
 
 int pointSpacing;
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C display(U8G2_R0, U8X8_PIN_NONE);
-
-// TODO: Do all this graphing stuff in a class
-Graph<float, POINT_COUNT> graph(display, 0, 0, 30, 15);
-
-float getY(int i, float min, float max) {
-  return map(graph.buffer[i], min, max, SCREEN_HEIGHT - GRAPH_MARGIN, SCREEN_HEIGHT - GRAPH_HEIGHT + GRAPH_MARGIN);
-}
-
-void drawLine(int i, float min, float max) {
-  int xPrev = pointSpacing * (i - 1);
-  int xCurr = pointSpacing * i;
-
-  int yPrev = getY(i - 1, min, max);
-  int yCurr = getY(i, min, max);
-
-  display.drawLine(xPrev, yPrev, xCurr, yCurr);
-}
+Graph<float, POINT_COUNT> graph(display, SCREEN_WIDTH, SCREEN_HEIGHT, GRAPH_HEIGHT, GRAPH_MARGIN, POINT_COUNT);
 
 void drawPoint(int i, float min, float max) {
   int xCurr = pointSpacing * i;
-  int yCurr = getY(i, min, max);
+  int yCurr = graph.getY(i, min, max);
 
   display.drawDisc(xCurr, yCurr, GRAPH_MARGIN - 1);
 }
@@ -59,7 +43,7 @@ void updateGraph(String rawValue) {
       drawPoint(i, min, max);
 
     if (i != 0)
-      drawLine(i, min, max);
+      graph.drawLine(i, min, max);
   }
 }
 
@@ -72,7 +56,6 @@ void updateDisplay(String value) {
 
 // Main
 void setup() {
-  pointSpacing = SCREEN_WIDTH / (POINT_COUNT - 1);
 
   display.begin();
   display.setPowerSave(0);
