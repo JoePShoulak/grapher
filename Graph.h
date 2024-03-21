@@ -3,24 +3,17 @@
 
 #include <U8g2lib.h>
 #include <Arduino.h>
-#include "CircularBuffer.h"
-#include "bufferHelper.h"
+#include <CircularBuffer.h>
 
 // TODO: Limit this to numeric types
 // TODO: Add options for label and unit for value display
-// CONSIDER: Adding fixed yMin and yMax instead of autoscaling
-// CONSIDER: Adding different scroll modes for the data
+// CONSIDER: Add option for fixed yMin and yMax instead of autoscaling
+// CONSIDER: Add different scroll modes
 template<typename T, int N>
 class Graph {
 public:
   Graph(U8G2_SSD1306_128X64_NONAME_F_HW_I2C &display, int screenWidth, int screenHeight, int graphHeight, int graphMargin, int pointCount);
   void begin();
-
-  T getY(int i, T min, T max);
-  void drawLine(int i, T min, T max);
-  void drawPoint(int i, T min, T max);
-  void updateGraph(String rawValue);
-  void updateText(String rawValue);
   void update(String rawValue);
 
 private:
@@ -28,6 +21,12 @@ private:
 
   CircularBuffer<T, N> _buffer;
   U8G2_SSD1306_128X64_NONAME_F_HW_I2C &_display;
+
+  T getY(int i, T min, T max);
+  void drawLine(int i, T min, T max);
+  void drawPoint(int i, T min, T max);
+  void updateGraph(String rawValue);
+  void updateText(String rawValue);
 };
 
 template<typename T, int N>
@@ -76,8 +75,8 @@ void Graph<T, N>::updateGraph(String rawValue) {
 
   _buffer.append(rawValue.toFloat());
 
-  T min = getMin(_buffer);
-  T max = getMax(_buffer);
+  T min = _buffer.minimum();
+  T max = _buffer.maximum();
 
   for (int i = 0; i < _buffer.count(); i++) {
     if (i == _buffer.index() - 1 || i == _buffer.count() - 1)
